@@ -1,0 +1,10 @@
+Message: am feeling low
+Emotion: neutral
+Message: am feeling low
+Emotion: neutral
+Reply: 👍 Got it. Let me know if you need anything.
+----------------------------------------
+Message: am feeling low
+Emotion: sad
+Reply: 😢 I'm here for you. Take care!
+----------------------------------------
