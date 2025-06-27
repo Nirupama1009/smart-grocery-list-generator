@@ -1,57 +1,45 @@
-from nltk.sentiment import SentimentIntensityAnalyzer
+import spacy
+import csv
 
-# Initialize analyzer
-sia = SentimentIntensityAnalyzer()
+# Load spaCy model
+nlp = spacy.load("en_core_web_sm")
 
-# Input message
-message = input("Friend's Message: ")
+# Load your meal plan (from .txt for now)
+with open("meal_plan.txt", "r", encoding="utf-8") as file:
+    text = file.read()
 
-# Get sentiment scores
-score = sia.polarity_scores(message)
-print("\nSentiment Score:", score)
+# Process the text
+doc = nlp(text)
 
-# Emotion override keywords
-emotion_keywords = {
-    'happy': ['passed', 'congrats', 'excited', 'awesome', 'great', 'joy', 'love'],
-    'sad': ['nothing', 'wrong', 'tired', 'alone', 'bad', 'down', 'depressed','low'],
+# Keywords to detect ingredients and their categories
+ingredient_categories = {
+    "vegetables": ["tomato", "potato"],
+    "grains": ["rice", "chapati", "idli", "dosa"],
+    "spices": ["masala", "chutney", "sambar"]
 }
 
-# Lowercase message for keyword match
-lower_msg = message.lower()
-found_emotion = None
+# Flat list for detection
+all_ingredients = [item for sublist in ingredient_categories.values() for item in sublist]
 
-# Check if any emotion keyword is in the message
-for emo, keywords in emotion_keywords.items():
-    if any(word in lower_msg for word in keywords):
-        found_emotion = emo
-        break
+# Extract and categorize
+unique_ingredients = set()
+categorized = {}
 
-# Use keyword emotion if found, else fallback to VADER sentiment
-if found_emotion:
-    emotion = found_emotion
-else:
-    if score['compound'] >= 0.5:
-        emotion = 'happy'
-    elif score['compound'] <= -0.5:
-        emotion = 'sad'
-    else:
-        emotion = 'neutral'
+for token in doc:
+    word = token.text.lower()
+    if word in all_ingredients:
+        unique_ingredients.add(word)
 
-print("Detected Emotion:", emotion)
+# Group by category
+for category, items in ingredient_categories.items():
+    categorized[category] = [item for item in unique_ingredients if item in items]
 
-# Auto-reply mapping
-auto_replies = {
-    'happy': "😊 I'm glad you're feeling good!",
-    'sad': "😢 I'm here for you. Take care!",
-    'neutral': "👍 Got it. Let me know if you need anything."
-}
+# Write to CSV
+with open("grocery_list.csv", "w", newline='', encoding="utf-8") as csvfile:
+    writer = csv.writer(csvfile)
+    writer.writerow(["Category", "Ingredient"])
+    for category, items in categorized.items():
+        for item in sorted(items):
+            writer.writerow([category.capitalize(), item])
 
-# Generate and show reply
-reply = auto_replies.get(emotion, "🤖 I'm not sure how to respond.")
-print("Auto-Reply:", reply)
-# Log the chat to a file with emoji-safe encoding
-with open("chat_log.txt", "a", encoding="utf-8") as log:
-    log.write(f"Message: {message}\n")
-    log.write(f"Emotion: {emotion}\n")
-    log.write(f"Reply: {reply}\n")
-    log.write("-" * 40 + "\n")
+print("✅ Grocery list saved as grocery_list.csv")
