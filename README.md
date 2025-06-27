@@ -37,7 +37,7 @@ It uses **VADER sentiment analysis** and custom keyword-based emotion detection 
 - chat_log.txt – Stores the history of conversations
 - README.md – Project overview and instructions
 
-## this is a part of Final Project:
+## This is a part of Final Project:
       
   This is Mini Project 1 in a collection of emotion-based automation tools, which will be combined into a final AI-powered Emotion Dashboard for daily life task automation.
 
